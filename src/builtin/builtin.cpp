@@ -2,7 +2,6 @@
 #include "../errors.hpp"
 #include "cd.hpp"
 #include <cstdlib>
-#include <print>
 #include <string>
 #include <vector>
 
@@ -18,7 +17,7 @@ BuiltInCommand getBuiltInCmd(const std::string &command) {
 }
 
 void intSignal(int sig) {
-  std::println("\n\nexiting...");
+  // std::println("\n\nexiting...");
   exit(sig);
 }
 

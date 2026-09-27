@@ -1,10 +1,10 @@
 #include "builtin/builtin.hpp"
 #include "errors.hpp"
+#include "prompt.hpp"
 #include <filesystem>
 #include <iostream>
 #include <print>
 #include <pwd.h>
-#include <signal.h>
 #include <sstream>
 #include <string>
 #include <sys/wait.h>
@@ -13,25 +13,9 @@
 
 namespace fs = std::filesystem;
 
-void print_prompt(const fs::path &cwd) {
-  char host[256];
-  gethostname(host, sizeof host);
-  std::string h(host);
-  h = h.substr(0, h.find('.'));
-  const std::string user = getpwuid(geteuid())->pw_name;
-
-  std::string home = getenv("HOME") ? getenv("HOME") : "";
-  std::string dir = cwd == home  ? "~"
-                    : cwd == "/" ? "/"
-                                 : cwd.filename().string();
-
-  std::print("{}@{} {}{}", user, h, dir, geteuid() == 0 ? " # " : " % ");
-  std::fflush(stdout);
-}
-
 int main() {
-
-  signal(SIGINT, intSignal);
+  // ctrl+c needs to stop foreground child not whole shell
+  // signal(SIGINT, intSignal);
 
   std::string input;
   std::vector<std::string> args;
@@ -49,6 +33,8 @@ int main() {
     if (!std::getline(std::cin, input)) {
       intSignal(0);
     }
+
+    std::println();
 
     // parse into string vector
     std::stringstream input_stream(input);
@@ -78,7 +64,8 @@ int main() {
           argv.push_back(nullptr);
 
           execvp(argv[0], argv.data());
-          printError({args.at(0), "failed to replace process"});
+          printError({args.at(0), "failed to replace child process\nDo you "
+                                  "have the right command?"});
           intSignal(1);
         } else {
           int status;
