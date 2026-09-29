@@ -7,4 +7,4 @@ struct Error {
   std::string message;
 };
 
-void printError(const Error &err);
+void print_error(const Error &err);

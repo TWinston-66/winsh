@@ -15,7 +15,6 @@ namespace fs = std::filesystem;
 
 int main() {
   // ctrl+c needs to stop foreground child not whole shell
-  // signal(SIGINT, intSignal);
 
   std::string input;
   std::vector<std::string> args;
@@ -31,10 +30,8 @@ int main() {
 
     // get input
     if (!std::getline(std::cin, input)) {
-      intSignal(0);
+      exit_shell(0);
     }
-
-    std::println();
 
     // parse into string vector
     std::stringstream input_stream(input);
@@ -45,14 +42,14 @@ int main() {
 
     // check for built in
     if (!args.empty()) {
-      BuiltInCommand cmd = getBuiltInCmd(args.at(0));
-      if (cmd != BuiltInCommand::NONE) {
-        runBuiltInCmd(cmd, args);
+      BuiltinCommand command = get_builtin_command(args.at(0));
+      if (command != BuiltinCommand::None) {
+        run_builtin_command(command, args);
       } else {
         // run external
         pid_t pid = fork();
         if (pid == -1) {
-          printError({args.at(0), "failed to fork process"});
+          print_error({args.at(0), "failed to fork process"});
         } else if (pid == 0) {
           std::vector<char *> argv;
           argv.reserve(args.size() + 1);
@@ -64,17 +61,19 @@ int main() {
           argv.push_back(nullptr);
 
           execvp(argv[0], argv.data());
-          printError({args.at(0), "failed to replace child process\nDo you "
-                                  "have the right command?"});
-          intSignal(1);
+          print_error({args.at(0), "failed to replace child process\nDo you "
+                                   "have the right command?"});
+          exit_shell(1);
         } else {
           int status;
           if (waitpid(pid, &status, 0) == -1) {
-            printError({"waitpid", "failed"});
+            print_error({"waitpid", "failed"});
           }
         }
       }
     }
+
+    std::println();
 
     // clear vector + command string
     input = "";

@@ -5,34 +5,35 @@
 #include <string>
 #include <vector>
 
-BuiltInCommand getBuiltInCmd(const std::string &command) {
+BuiltinCommand get_builtin_command(const std::string &command) {
   if (command == "cd")
-    return BuiltInCommand::CD;
+    return BuiltinCommand::Cd;
   if (command == "pwd")
-    return BuiltInCommand::PWD;
+    return BuiltinCommand::Pwd;
   if (command == "exit")
-    return BuiltInCommand::EXIT;
+    return BuiltinCommand::Exit;
 
-  return BuiltInCommand::NONE;
+  return BuiltinCommand::None;
 }
 
-void intSignal(int sig) {
+void exit_shell(int status) {
   // std::println("\n\nexiting...");
-  exit(sig);
+  exit(status);
 }
 
-void runBuiltInCmd(BuiltInCommand cmd, const std::vector<std::string> &args) {
-  switch (cmd) {
-  case BuiltInCommand::EXIT:
-    intSignal(0);
+void run_builtin_command(BuiltinCommand command,
+                         const std::vector<std::string> &args) {
+  switch (command) {
+  case BuiltinCommand::Exit:
+    exit_shell(0);
     return;
-  case BuiltInCommand::CD:
+  case BuiltinCommand::Cd:
     cd(args);
     return;
-  case BuiltInCommand::PWD:
-    printwd();
+  case BuiltinCommand::Pwd:
+    print_pwd();
     return;
-  case BuiltInCommand::NONE:
-    printError({"builtin", "could not find builtin"});
+  case BuiltinCommand::None:
+    print_error({"builtin", "could not find builtin"});
   }
 }

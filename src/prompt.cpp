@@ -3,25 +3,33 @@
 #include "errors.hpp"
 #include <filesystem>
 #include <iostream>
-#include <print>
 #include <pwd.h>
 #include <string>
+#include <string_view>
 #include <sys/wait.h>
 #include <unistd.h>
 
 namespace fs = std::filesystem;
 
+namespace {
+constexpr std::string_view reset = "\033[0m";
+constexpr std::string_view red = "\033[31m";
+constexpr std::string_view green = "\033[32m";
+constexpr std::string_view yellow = "\033[33m";
+constexpr std::string_view blue = "\033[34m";
+} // namespace
+
 void print_prompt(const fs::path &cwd) {
   char host[256];
   gethostname(host, sizeof(host));
 
-  std::string h(host);
-  h = h.substr(0, h.find('.'));
+  std::string hostname(host);
+  hostname = hostname.substr(0, hostname.find('.'));
 
   passwd *user_info = getpwuid(geteuid());
   if (user_info == nullptr) {
-    printError({"prompt", "failed to get user info"});
-    intSignal(1);
+    print_error({"prompt", "failed to get user info"});
+    exit_shell(1);
   }
   const std::string user = getpwuid(geteuid())->pw_name;
 
@@ -42,14 +50,14 @@ void print_prompt(const fs::path &cwd) {
     dir = cwd.filename().string();
   }
 
-  std::string prompt_symbol;
+  std::cout << blue << hostname << reset;
+  std::cout << " in ";
+  std::cout << yellow << dir << reset << '\n';
 
   if (geteuid() == 0) {
-    prompt_symbol = " # ";
+    std::cout << red << "❯" << reset << " " << reset;
   } else {
-    prompt_symbol = " % ";
+    std::cout << green << "❯" << reset << " " << reset;
   }
-
-  std::print("\n{}@{} {}{}", user, h, dir, prompt_symbol);
-  std::cout << std::flush;
+  std::cout << reset << std::flush;
 }

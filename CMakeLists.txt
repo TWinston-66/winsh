@@ -7,6 +7,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable(winsh
     src/main.cpp
     src/errors.cpp
+    src/prompt.cpp
+    src/timer.cpp
     src/builtin/builtin.cpp
     src/builtin/cd.cpp
 )

@@ -3,6 +3,6 @@
 #include <string>
 #include <vector>
 
-void printwd();
+void print_pwd();
 
 int cd(const std::vector<std::string> &args);

@@ -3,15 +3,16 @@
 #include <string>
 #include <vector>
 
-enum class BuiltInCommand {
-  CD,
-  PWD,
-  EXIT,
-  NONE,
+enum class BuiltinCommand {
+  Cd,
+  Pwd,
+  Exit,
+  None,
 };
 
-BuiltInCommand getBuiltInCmd(const std::string &command);
+BuiltinCommand get_builtin_command(const std::string &command);
 
-void intSignal(int sig);
+void exit_shell(int status);
 
-void runBuiltInCmd(BuiltInCommand cmd, const std::vector<std::string> &args);
+void run_builtin_command(BuiltinCommand command,
+                         const std::vector<std::string> &args);
