@@ -19,7 +19,7 @@ constexpr std::string_view yellow = "\033[33m";
 constexpr std::string_view blue = "\033[34m";
 } // namespace
 
-void print_prompt(const fs::path &cwd) {
+void print_prompt(const fs::path &cwd, std::string &duration) {
   char host[256];
   gethostname(host, sizeof(host));
 
@@ -52,12 +52,14 @@ void print_prompt(const fs::path &cwd) {
 
   std::cout << blue << hostname << reset;
   std::cout << " in ";
-  std::cout << yellow << dir << reset << '\n';
+  std::cout << yellow << dir << reset << " took " << green << duration << reset
+            << '\n';
 
   if (geteuid() == 0) {
     std::cout << red << "❯" << reset << " " << reset;
   } else {
     std::cout << green << "❯" << reset << " " << reset;
   }
+
   std::cout << reset << std::flush;
 }

@@ -1,6 +1,8 @@
 #include "builtin/builtin.hpp"
 #include "errors.hpp"
 #include "prompt.hpp"
+#include "timer.hpp"
+#include <chrono>
 #include <filesystem>
 #include <iostream>
 #include <print>
@@ -12,6 +14,7 @@
 #include <vector>
 
 namespace fs = std::filesystem;
+using namespace std::chrono;
 
 int main() {
   // ctrl+c needs to stop foreground child not whole shell
@@ -20,13 +23,19 @@ int main() {
   std::vector<std::string> args;
 
   fs::path current_dir;
+
+  steady_clock::time_point start;
+  steady_clock::time_point end;
+  std::string duration;
+
   while (true) {
 
     // CWD
     current_dir = fs::current_path();
 
     // Print prompt
-    print_prompt(current_dir);
+    duration = get_formatted_duration(start, end);
+    print_prompt(current_dir, duration);
 
     // get input
     if (!std::getline(std::cin, input)) {
@@ -44,9 +53,11 @@ int main() {
     if (!args.empty()) {
       BuiltinCommand command = get_builtin_command(args.at(0));
       if (command != BuiltinCommand::None) {
+        start = get_current_time();
         run_builtin_command(command, args);
       } else {
         // run external
+        start = get_current_time();
         pid_t pid = fork();
         if (pid == -1) {
           print_error({args.at(0), "failed to fork process"});
@@ -72,6 +83,7 @@ int main() {
         }
       }
     }
+    end = get_current_time();
 
     std::println();
 
